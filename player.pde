@@ -49,13 +49,17 @@ class Player {
     }
     
     grounded = true;
+    damage = 1.0;
   }
   
   void input(HashMap<Character, Boolean> inputs) {
     if(inputs.get(U) && grounded) {
       // jump
-      PVector f = PVector.fromAngle(HALF_PI);
+      PVector f = PVector.fromAngle(-HALF_PI);
       f.setMag(JUMP_SPEED);
+      
+      grounded = false;
+      
       applyForce(f);
       
       state = 2;
@@ -94,6 +98,8 @@ class Player {
   }
   
   void display() {
+    
+    
     if(state == 0) {  // Idle
       image(idle, center.x, center.y);
     } else if (state == 1) {  // Walk
@@ -105,6 +111,9 @@ class Player {
     } else if (state == 4) {  // Attack
       image(attack, center.x, center.y);
     } 
+    
+    fill(128, 255, 255);
+    ellipse(feet.x, feet.y, 5, 5);
   }
   
   void applyForce(PVector force) {
@@ -112,14 +121,17 @@ class Player {
   }
   
   void update() {
+    //println(grounded);
+    
     if(!grounded) {
-      applyForce(new PVector(0, 2));
+      applyForce(new PVector(0, .5));
     }
     
     acc.mult(damage);
     vel.mult(MOVEMENT_MULTIPLIER);
     vel.add(acc);
     center.add(vel);
+    feet.add(vel);
     
     acc.mult(0);
   }

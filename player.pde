@@ -4,6 +4,7 @@ class Player {
   PImage idle, walk, jump, duck, attack;
   float damage;
   boolean player1;
+  boolean grounded;
   
   float MOVEMENT_MULTIPLIER = 0.95;
   
@@ -12,11 +13,11 @@ class Player {
   
   char U, D, R, L, A;
   
-  int state;  // 0: idle
-              // 1: walking
-              // 2: jumping
-              // 3: ducking
-              // 4: attacking
+  int state, previousState; // 0: idle
+                            // 1: walking
+                            // 2: jumping
+                            // 3: ducking
+                            // 4: attacking
   
   Player(PImage idle, PImage walk, PImage jump, PImage duck, PImage attack, boolean player1) {
     // imageMode(CENTER);
@@ -46,32 +47,49 @@ class Player {
       L = '+';  // left arrow
       A = '|';  // right ctrl
     }
+    
+    grounded = true;
   }
   
   void input(HashMap<Character, Boolean> inputs) {
-    if(inputs.get(U)) {
+    if(inputs.get(U) && grounded) {
       // jump
       PVector f = PVector.fromAngle(HALF_PI);
       f.setMag(JUMP_SPEED);
       applyForce(f);
+      
+      state = 2;
     }
     if(inputs.get(D)) {
       // crouch?
+      previousState = state;
+      state = 3;
+    } else if(state == 3 && !inputs.get(D)) {
+      state = previousState;
     }
     if(inputs.get(R)) {
       // move right
       PVector f = PVector.fromAngle(0);
       f.setMag(MOVE_SPEED);
       applyForce(f);
+      
+      if(grounded) { state = 1; }
+      else { state = 2; }
+      
     }
     if(inputs.get(L)) {
       // move left
       PVector f = PVector.fromAngle(PI);
       f.setMag(MOVE_SPEED);
       applyForce(f);
+      
+      if(grounded) { state = 1; }
+      else { state = 2; }
     }
     if(inputs.get(A)) {
       // attack
+      
+      state = 4;
     }
   }
   
@@ -94,6 +112,10 @@ class Player {
   }
   
   void update() {
+    if(!grounded) {
+      applyForce(new PVector(0, 2));
+    }
+    
     acc.mult(damage);
     vel.mult(MOVEMENT_MULTIPLIER);
     vel.add(acc);

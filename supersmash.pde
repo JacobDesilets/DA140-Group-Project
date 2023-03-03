@@ -15,12 +15,15 @@ Stage stage2 = new Stage(125,10, 150, 250,100);
 Stage stage3 = new Stage(125,10, -150, 250,100);
 Stage stage4 = new Stage(125,10, 0, 375,100);
 
+Platform p1, p2, p3;
+
 char[] possibleInputs = {'w', 'a', 's', 'd', ' '};
 
 void setup()
 {
   background(0);
   colorMode(HSB, 255);
+  imageMode(CENTER);
   size (800,500);
   
   p1idle = loadImage("art/char1_idle.png");
@@ -37,27 +40,53 @@ void setup()
   
   stage1 = new Stage(500,20, 0, 125,100);
   player1 = new Player(p1idle, walk, jump, duck, attack, true);
+  player1.center.x = width/2;
   
   for (char c : possibleInputs) {
     input.put(c, false);
   }
+  
+  p1 = new Platform(20, height-50, 500, 20);
+  p2 = new Platform(20, height-200, 200, 20);
+  p3 = new Platform(200, height-350, 200, 20);
 }
 
 void draw()
 {  
    background(0);
-   stage1.display();
-   stage2.display();
-   stage3.display();
-   stage4.display();
+   //stage1.display();
+   //stage2.display();
+   //stage3.display();
+   //stage4.display();
+   p1.display();
+   p2.display();
+   p3.display();
+   
+   
+   player1.phaseThrough = false;
    
    player1.input(input);
    player1.update();
    player1.display();
    
+   player1.grounded = false;
+   
    //Function calls for each platform
-   onPlatform (stage1, player1);
+   //onPlatform (stage1, player1);a
+   playerOnPlatformCheck(player1, p1);
+   playerOnPlatformCheck(player1, p2);
+   playerOnPlatformCheck(player1, p3);
 
+}
+
+void playerOnPlatformCheck(Player plyr, Platform pltfm) {
+  if(pltfm.collisionCheck(plyr.feet)) {
+     if(!plyr.phaseThrough) {
+       plyr.vel.y = 0;
+       plyr.center.y = pltfm.y - 32;
+       plyr.grounded = true;
+     }
+  }
 }
 
 //Edits player attributes based on if it is on platform or not

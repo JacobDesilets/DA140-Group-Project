@@ -20,7 +20,29 @@ class Stage
   {   
       noStroke();
       rect(((width*1/2) - (sWidth*1/2)) - translateX, height - translateY, sWidth, sHeight); 
+      //rect(width - translateX, height - translateY, sWidth, sHeight); 
       
-      
+  }
+}
+
+
+class Platform {
+  float x, y, w, h;
+  
+  Platform(float x, float y, float w, float h) {
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+  }
+  
+  void display() {
+    noStroke();
+    fill(0, 0, 255);
+    rect(x, y, w, h);
+  }
+  
+  boolean collisionCheck(PVector point) {
+    return ((point.x >= x && point.x <= (x+w)) && (point.y >= y && point.y <= (y+h)));
   }
 }

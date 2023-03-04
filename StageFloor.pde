@@ -28,12 +28,14 @@ class Stage
 
 class Platform {
   float x, y, w, h;
+  boolean fallable;
   
-  Platform(float x, float y, float w, float h) {
+  Platform(float x, float y, float w, float h, boolean fallable) {
     this.x = x;
     this.y = y;
     this.w = w;
     this.h = h;
+    this.fallable = fallable;
   }
   
   void display() {

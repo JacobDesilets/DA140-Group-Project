@@ -1,16 +1,20 @@
 
 class Player {
-  PVector feet, center, vel, acc;
+  PVector feet, center, vel, acc, fist;
   PImage idle, walk, jump, duck, attack;
   float damage;
   boolean player1;
   boolean grounded;
+  boolean facingRight;
   
   float MOVEMENT_MULTIPLIER = 0.9;
   float GRAVITY = 1;
+  float ATTACK_COOLDOWN = 1000.0;
   
   float JUMP_SPEED = 30;
   float MOVE_SPEED = 1;
+  
+  int timer;
   
   char U, D, R, L, A;
   
@@ -35,6 +39,7 @@ class Player {
     center = new PVector(0, 0);
     acc = new PVector(0, 0);
     vel = new PVector(0, 0);
+    fist = new PVector(0, 0);
     
     if(this.player1) {
       U = 'w';
@@ -56,12 +61,22 @@ class Player {
     
     phaseThrough = false;
     jumpReleased = true;
+    
+    facingRight = true;
+    timer = millis();
+  }
+  
+  void takeDamage(float dmg, float dir) {
+    damage += dmg;
+    
+    PVector knockback = PVector.fromAngle(dir);
+    knockback.setMag(damage);
+    applyForce(knockback);
   }
   
   void input(HashMap<Character, Boolean> inputs) {
     moving = false;
     attacking = false;
-    
     if(inputs.get(U) && grounded) {
       // jump
       
@@ -94,6 +109,7 @@ class Player {
       applyForce(f);
       moving = true;
       state = 1;
+      facingRight = true;
     }
     if(inputs.get(L)) {
       // move left
@@ -102,36 +118,58 @@ class Player {
       applyForce(f);
       moving = true;
       state = 1;
+      facingRight = false;
     }
     if(inputs.get(A)) {
       // attack
-      moving = true;
-      attacking = true;
-      state = 4;
+      if(checkTimer()) {
+        timer = millis();
+        moving = true;
+        attacking = true;
+        state = 4;
+      }
     }
     
     if(!grounded && !attacking) { state = 2; }
     else if (!moving) { state = 0; }
   }
   
+  boolean checkTimer() {
+    
+    int dt = millis() - timer;
+    println(dt > ATTACK_COOLDOWN);
+    return(dt > ATTACK_COOLDOWN);
+  }
+  
   void display() {
     
+    pushMatrix();
+    
+    translate(center.x, center.y);
+    if(!facingRight) { scale(-1, 1); }
+    else { scale(1, 1); }
     
     if(state == 0) {  // Idle
-      image(idle, center.x, center.y);
+      image(idle, 0, 0);
     } else if (state == 1) {  // Walk
-      image(walk, center.x, center.y);
+      image(walk, 0, 0);
     } else if (state == 2) {  // Jump
-      image(jump, center.x, center.y);
+      image(jump, 0, 0);
     } else if (state == 3) {  // Duck
-      image(duck, center.x, center.y);
-    } else if (state == 4) {  // Attack
-      image(attack, center.x, center.y);
-    } 
+      image(duck, 0, 0);
+    } else if (state == 4 && attacking) {  // Attack
+      image(attack, 0, 0);
+    }
+    
+    
     
     fill(128, 255, 255);
-    ellipse(feet.x, feet.y, 5, 5);
+    ellipse(0, 32, 5, 5);
+    popMatrix();
+    ellipse(fist.x, fist.y, 5, 5);
   }
+  
+    
   
   void applyForce(PVector force) {
     acc.add(force);
@@ -150,6 +188,9 @@ class Player {
     center.add(vel);
     feet.x = center.x;
     feet.y = center.y + 32;
+    fist.y = center.y;
+    if(facingRight) { fist.x = center.x+32; }
+    else { fist.x = center.x-32; }
     
     acc.mult(0);
   }

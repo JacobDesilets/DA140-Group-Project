@@ -1,15 +1,21 @@
 import java.util.Map;
 
 PImage p1idle;
-PImage walk;
-PImage jump;
-PImage duck;
-PImage attack;
+PImage p1walk;
+PImage p1jump;
+PImage p1duck;
+PImage p1attack;
+
+PImage p2idle;
+PImage p2walk;
+PImage p2jump;
+PImage p2duck;
+PImage p2attack;
 
 HashMap<Character, Boolean> input = new HashMap<Character, Boolean>();
 
 
-Player player1;
+Player player1, player2;
 Stage stage1;
 Stage stage2 = new Stage(125,10, 150, 250,100);
 Stage stage3 = new Stage(125,10, -150, 250,100);
@@ -17,7 +23,7 @@ Stage stage4 = new Stage(125,10, 0, 375,100);
 
 Platform p1, p2, p3;
 
-char[] possibleInputs = {'w', 'a', 's', 'd', ' '};
+char[] possibleInputs = {'w', 'a', 's', 'd', ' ', '-', '_', '=', '+', '|'};
 
 void setup()
 {
@@ -27,33 +33,53 @@ void setup()
   size (800,500);
   
   p1idle = loadImage("art/char1_idle.png");
-  walk = loadImage("art/char1_walk.png");
-  jump = loadImage("art/char1_jump.png");
-  duck = loadImage("art/char1_duck.png");
-  attack = loadImage("art/char1_attack.png");
+  p1walk = loadImage("art/char1_walk.png");
+  p1jump = loadImage("art/char1_jump.png");
+  p1duck = loadImage("art/char1_duck.png");
+  p1attack = loadImage("art/char1_attack.png");
   
   p1idle.resize(64,64);
-  walk.resize(64,64);
-  jump.resize(64,64);
-  duck.resize(64,64);
-  attack.resize(64,64);
+  p1walk.resize(64,64);
+  p1jump.resize(64,64);
+  p1duck.resize(64,64);
+  p1attack.resize(64,64);
+  
+  p2idle = loadImage("art/char2_idle.png");
+  p2walk = loadImage("art/char2_walk.png");
+  p2jump = loadImage("art/char2_jump.png");
+  p2duck = loadImage("art/char2_duck.png");
+  p2attack = loadImage("art/char2_attack.png");
+  
+  p2idle.resize(64,64);
+  p2walk.resize(64,64);
+  p2jump.resize(64,64);
+  p2duck.resize(64,64);
+  p2attack.resize(64,64);
   
   stage1 = new Stage(500,20, 0, 125,100);
-  player1 = new Player(p1idle, walk, jump, duck, attack, true);
+  player1 = new Player(p1idle, p1walk, p1jump, p1duck, p1attack, true);
   player1.center.x = width/2;
+  
+  player2 = new Player(p2idle, p2walk, p2jump, p2duck, p2attack, false);
+  player2.center.x = width/2 + 50;
   
   for (char c : possibleInputs) {
     input.put(c, false);
   }
   
-  p1 = new Platform(20, height-50, 500, 20);
-  p2 = new Platform(20, height-200, 200, 20);
-  p3 = new Platform(200, height-350, 200, 20);
+  p1 = new Platform(20, height-50, 500, 20, false);
+  p2 = new Platform(20, height-200, 200, 20, true);
+  p3 = new Platform(200, height-350, 200, 20, true);
 }
 
 void draw()
 {  
    background(0);
+   
+   // UI
+   text("Player 1: " + player1.damage, 50, 50);
+   text("Player 2: " + player2.damage, 50, 100);
+   
    //stage1.display();
    //stage2.display();
    //stage3.display();
@@ -64,24 +90,49 @@ void draw()
    
    
    player1.phaseThrough = false;
+   player2.phaseThrough = false;
    
    player1.input(input);
    player1.update();
    player1.display();
    
+   player2.input(input);
+   player2.update();
+   player2.display();
+   
    player1.grounded = false;
+   player2.grounded = false;
    
    //Function calls for each platform
    //onPlatform (stage1, player1);a
    playerOnPlatformCheck(player1, p1);
    playerOnPlatformCheck(player1, p2);
    playerOnPlatformCheck(player1, p3);
+   
+   playerOnPlatformCheck(player2, p1);
+   playerOnPlatformCheck(player2, p2);
+   playerOnPlatformCheck(player2, p3);
+   
+   // hit checks
+   if(hitCheck(player1, player2) && player1.attacking) {
+     float dir = player1.facingRight ? 0 : -PI;
+     player2.takeDamage(0.1, dir);
+   }
+   
+   if(hitCheck(player2, player1) && player2.attacking) {
+     float dir = player2.facingRight ? 0 : -PI;
+     player1.takeDamage(0.1, dir);
+   }
 
+}
+
+boolean hitCheck(Player plyr1, Player plyr2) {
+  return( plyr1.fist.x > (plyr2.center.x -24 ) && plyr1.fist.x < (plyr2.center.x + 24 ) && plyr1.fist.y > (plyr2.center.y -24 ) && plyr1.fist.y < (plyr2.center.y + 24 ));
 }
 
 void playerOnPlatformCheck(Player plyr, Platform pltfm) {
   if(pltfm.collisionCheck(plyr.feet)) {
-     if(!plyr.phaseThrough) {
+     if(!plyr.phaseThrough || !pltfm.fallable) {
        plyr.vel.y = 0;
        plyr.center.y = pltfm.y - 32;
        plyr.grounded = true;
@@ -107,14 +158,31 @@ boolean isOnPlatform( Stage stg, Player ply) {
 
 // keep track of which keys are pressed in the kbInputs hashmap
 void keyPressed() {
-  if (arrayContains(possibleInputs, key)) {
-    input.put(key, true);
+  char keyval = key;
+  if (key == CODED) {
+    if (keyCode == UP) { keyval = '-';}
+    if (keyCode == DOWN) { keyval = '_';}
+    if (keyCode == RIGHT) { keyval = '=';}
+    if (keyCode == LEFT) { keyval = '+';}
+    if (keyCode == CONTROL) { keyval = '|';}
+  }
+  
+  if (arrayContains(possibleInputs, keyval)) {
+    input.put(keyval, true);
   }
 }
 
 void keyReleased() {
-  if (arrayContains(possibleInputs, key)) {
-    input.put(key, false);
+  char keyval = key;
+  if (key == CODED) {
+    if (keyCode == UP) { keyval = '-';}
+    if (keyCode == DOWN) { keyval = '_';}
+    if (keyCode == RIGHT) { keyval = '=';}
+    if (keyCode == LEFT) { keyval = '+';}
+    if (keyCode == CONTROL) { keyval = '|';}
+  }
+  if (arrayContains(possibleInputs, keyval)) {
+    input.put(keyval, false);
   }
 }
 

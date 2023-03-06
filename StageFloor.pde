@@ -1,29 +1,29 @@
-class Stage
-{
-  float sWidth;
-  float sHeight;
-  float translateX;
-  float translateY;
-  float divisions;
-  boolean isVisible = true;
+//class Stage
+//{
+//  float sWidth;
+//  float sHeight;
+//  float translateX;
+//  float translateY;
+//  float divisions;
+//  boolean isVisible = true;
   
-  Stage (float tempW, float tempY, float tempTransX, float tempTransY, float divs)
-  {
-    sWidth = tempW;
-    sHeight = tempY;
-    translateY = tempTransY;
-    translateX = tempTransX;
-    divisions = divs;
-  }
+//  Stage (float tempW, float tempY, float tempTransX, float tempTransY, float divs)
+//  {
+//    sWidth = tempW;
+//    sHeight = tempY;
+//    translateY = tempTransY;
+//    translateX = tempTransX;
+//    divisions = divs;
+//  }
   
-  void display() 
-  {   
-      noStroke();
-      rect(((width*1/2) - (sWidth*1/2)) - translateX, height - translateY, sWidth, sHeight); 
-      //rect(width - translateX, height - translateY, sWidth, sHeight); 
+//  void display() 
+//  {   
+//      noStroke();
+//      rect(((width*1/2) - (sWidth*1/2)) - translateX, height - translateY, sWidth, sHeight); 
+//      //rect(width - translateX, height - translateY, sWidth, sHeight); 
       
-  }
-}
+//  }
+//}
 
 
 class Platform {
@@ -45,6 +45,10 @@ class Platform {
   }
   
   boolean collisionCheck(PVector point) {
-    return ((point.x >= x && point.x <= (x+w)) && (point.y >= y && point.y <= (y+h)));
+    return ((point.x >= x && point.x <= (x+w)) && (point.y >= y-1 && point.y <= (y+h)));
+  }
+  
+  boolean overEdge(PVector point) {
+    return (point.x >= x && point.x <= (x+w));
   }
 }

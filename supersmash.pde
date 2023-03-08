@@ -12,6 +12,8 @@ PImage p2jump;
 PImage p2duck;
 PImage p2attack;
 
+PImage fist;
+
 HashMap<Character, Boolean> input = new HashMap<Character, Boolean>();
 
 
@@ -29,6 +31,9 @@ void setup()
   colorMode(HSB, 255);
   imageMode(CENTER);
   size (800,500);
+  
+  fist = loadImage("art/fist.png");
+  fist.resize(32,32);
   
   p1idle = loadImage("art/char1_idle.png");
   p1walk = loadImage("art/char1_walk.png");
@@ -55,10 +60,10 @@ void setup()
   p2attack.resize(64,64);
   
   //stage1 = new Stage(500,20, 0, 125,100);
-  player1 = new Player(p1idle, p1walk, p1jump, p1duck, p1attack, true);
+  player1 = new Player(p1idle, p1walk, p1jump, p1duck, p1attack, fist, true);
   player1.center.x = width/2;
   
-  player2 = new Player(p2idle, p2walk, p2jump, p2duck, p2attack, false);
+  player2 = new Player(p2idle, p2walk, p2jump, p2duck, p2attack, fist, false);
   player2.center.x = width/2 + 50;
   
   players = new Player[]{player1, player2};
@@ -106,7 +111,7 @@ void draw()
    // hit checks
    if(hitCheck(player1, player2) && player1.attacking) {
      float dir = player1.facingRight ? 0 : -PI;
-     player2.takeDamage(0.1, dir);
+     player2.takeDamage(0.3, dir);
    }
    
    if(hitCheck(player2, player1) && player2.attacking) {
@@ -128,7 +133,6 @@ boolean hitCheck(Player plyr1, Player plyr2) {
 void displayStats( Player ply ) { 
   fill (0,0,255);
   textSize(32);
-  println("got here");
   if(ply.player1) {
     text("P1: " + round(player1.damage * 10) * .1 + "%", (width/2 - 155), 30); 
   } else {

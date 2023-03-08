@@ -14,6 +14,7 @@ class Player {
   float JUMP_SPEED = 30;
   float MOVE_SPEED = 1;
   
+  int stocks = 3;
   int timer;
   
   char U, D, R, L, A;

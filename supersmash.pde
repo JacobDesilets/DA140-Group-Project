@@ -16,12 +16,10 @@ HashMap<Character, Boolean> input = new HashMap<Character, Boolean>();
 
 
 Player player1, player2;
-Stage stage1;
-Stage stage2 = new Stage(125,10, 150, 250,100);
-Stage stage3 = new Stage(125,10, -150, 250,100);
-Stage stage4 = new Stage(125,10, 0, 375,100);
+Player[] players;
 
 Platform p1, p2, p3;
+Platform[] platforms;
 
 char[] possibleInputs = {'w', 'a', 's', 'd', ' ', '-', '_', '=', '+', '|'};
 
@@ -56,12 +54,14 @@ void setup()
   p2duck.resize(64,64);
   p2attack.resize(64,64);
   
-  stage1 = new Stage(500,20, 0, 125,100);
+  //stage1 = new Stage(500,20, 0, 125,100);
   player1 = new Player(p1idle, p1walk, p1jump, p1duck, p1attack, true);
   player1.center.x = width/2;
   
   player2 = new Player(p2idle, p2walk, p2jump, p2duck, p2attack, false);
   player2.center.x = width/2 + 50;
+  
+  players = new Player[]{player1, player2};
   
   for (char c : possibleInputs) {
     input.put(c, false);
@@ -70,49 +70,37 @@ void setup()
   p1 = new Platform(20, height-50, 500, 20, false);
   p2 = new Platform(20, height-200, 200, 20, true);
   p3 = new Platform(200, height-350, 200, 20, true);
+  platforms = new Platform[]{p1, p2, p3};
 }
 
 void draw()
 {  
    background(0);
    
-   //stage1.display();
-   //stage2.display();
-   //stage3.display();
-   //stage4.display();
-   p1.display();
-   p2.display();
-   p3.display();
+
+   // UI
+   text("Player 1: " + player1.damage, 50, 50);
+   text("Player 2: " + player2.damage, 50, 100);
    
-   displayStocks(player1);
-   displayStocks(player2);
+   for (Platform p : platforms) {
+     p.display();
+   }
+
    
-   displayStats(player1);
-   displayStats(player2);
    
-   player1.phaseThrough = false;
-   player2.phaseThrough = false;
+   //player1.phaseThrough = false;
+   //player2.phaseThrough = false;
    
-   player1.input(input);
-   player1.update();
-   player1.display();
-   
-   player2.input(input);
-   player2.update();
-   player2.display();
-   
-   player1.grounded = false;
-   player2.grounded = false;
-   
-   //Function calls for each platform
-   //onPlatform (stage1, player1);a
-   playerOnPlatformCheck(player1, p1);
-   playerOnPlatformCheck(player1, p2);
-   playerOnPlatformCheck(player1, p3);
-   
-   playerOnPlatformCheck(player2, p1);
-   playerOnPlatformCheck(player2, p2);
-   playerOnPlatformCheck(player2, p3);
+   for(Player p : players) {
+     p.input(input);
+     p.display();
+     
+     p.update();
+     for(Platform platform : platforms) {
+       p.platformCollide(platform);
+     }
+     
+   }
    
    // hit checks
    if(hitCheck(player1, player2) && player1.attacking) {
@@ -133,6 +121,7 @@ void draw()
 boolean hitCheck(Player plyr1, Player plyr2) {
   return( plyr1.fist.x > (plyr2.center.x -24 ) && plyr1.fist.x < (plyr2.center.x + 24 ) && plyr1.fist.y > (plyr2.center.y -24 ) && plyr1.fist.y < (plyr2.center.y + 24 ));
 }
+
 
 //Displays player percent
 void displayStats( Player ply ) { 
@@ -212,6 +201,7 @@ boolean isOnPlatform( Stage stg, Player ply) {
 boolean isOffStage( Player ply ) {
   return (ply.center.y > height+32);
 }
+
 
 // keep track of which keys are pressed in the kbInputs hashmap
 void keyPressed() {

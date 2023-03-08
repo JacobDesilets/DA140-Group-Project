@@ -1,6 +1,6 @@
 
 class Player {
-  PVector feet, center, vel, acc, fist;
+  PVector feet, previousFeet, center, vel, acc, fist;
   PImage idle, walk, jump, duck, attack;
   float damage;
   boolean player1;
@@ -9,17 +9,19 @@ class Player {
   
   float MOVEMENT_MULTIPLIER = 0.9;
   float GRAVITY = 1;
-  float ATTACK_COOLDOWN = 1000.0;
+  int ATTACK_COOLDOWN = 1000;
   
   float JUMP_SPEED = 30;
   float MOVE_SPEED = 1;
   
+
+  int attack_cooldown_timer, attack_length;
   int stocks = 3;
   int timer;
   
   char U, D, R, L, A;
   
-  boolean moving, attacking, phaseThrough, jumpReleased;
+  boolean attacking, phaseThrough, jumpReleased;
   
   int state, previousState; // 0: idle
                             // 1: walking
@@ -37,6 +39,7 @@ class Player {
     this.player1 = player1;
     
     feet = new PVector(0, 32);
+    previousFeet = new PVector(0, 32);
     center = new PVector(0, 0);
     acc = new PVector(0, 0);
     vel = new PVector(0, 0);
@@ -57,14 +60,14 @@ class Player {
       A = '|';  // right ctrl
     }
     
-    grounded = true;
+    grounded = false;
     damage = 1.0;
     
     phaseThrough = false;
     jumpReleased = true;
     
     facingRight = true;
-    timer = millis();
+    attack_cooldown_timer = millis();
   }
   
   void takeDamage(float dmg, float dir) {
@@ -76,8 +79,9 @@ class Player {
   }
   
   void input(HashMap<Character, Boolean> inputs) {
-    moving = false;
+    state = 0;
     attacking = false;
+    
     if(inputs.get(U) && grounded) {
       // jump
       
@@ -86,8 +90,8 @@ class Player {
         f.setMag(JUMP_SPEED);
       
         applyForce(f);
+        grounded = false;
       
-        moving = true;
         state = 2;
         jumpReleased = false;
       }
@@ -97,18 +101,15 @@ class Player {
       
     if(inputs.get(D)) {
       // crouch?
-      moving = true;
       phaseThrough = true;
       state = 3;
-    } else if(state == 3 && !inputs.get(D)) {
-      state = 0;
     }
+    
     if(inputs.get(R)) {
       // move right
       PVector f = PVector.fromAngle(0);
       f.setMag(MOVE_SPEED);
       applyForce(f);
-      moving = true;
       state = 1;
       facingRight = true;
     }
@@ -117,29 +118,27 @@ class Player {
       PVector f = PVector.fromAngle(PI);
       f.setMag(MOVE_SPEED);
       applyForce(f);
-      moving = true;
       state = 1;
       facingRight = false;
     }
     if(inputs.get(A)) {
-      // attack
-      if(checkTimer()) {
-        timer = millis();
-        moving = true;
+      // attackg
+      
+      
+      if(checkTimer(attack_cooldown_timer, ATTACK_COOLDOWN)) {
+        attack_cooldown_timer = millis();
+        attack_length = millis();
         attacking = true;
         state = 4;
       }
     }
     
-    if(!grounded && !attacking) { state = 2; }
-    else if (!moving) { state = 0; }
   }
   
-  boolean checkTimer() {
+  boolean checkTimer(int t, int c) {
     
-    int dt = millis() - timer;
-    println(dt > ATTACK_COOLDOWN);
-    return(dt > ATTACK_COOLDOWN);
+    int dt = millis() - t;
+    return(dt > c);
   }
   
   void display() {
@@ -177,7 +176,8 @@ class Player {
   }
   
   void update() {
-    //println(grounded);
+    //println(center.y);
+    println(grounded);
     
     if(!grounded) {
       applyForce(new PVector(0, GRAVITY));
@@ -187,12 +187,32 @@ class Player {
     vel.mult(MOVEMENT_MULTIPLIER);
     vel.add(acc);
     center.add(vel);
+    previousFeet = feet.copy();
     feet.x = center.x;
-    feet.y = center.y + 32;
+    feet.y = center.y + 32.0;
     fist.y = center.y;
     if(facingRight) { fist.x = center.x+32; }
     else { fist.x = center.x-32; }
     
     acc.mult(0);
+    //grounded = false;
+  }
+  
+  void platformCollide(Platform platform) {
+    if(platform.collisionCheck(feet) && !grounded ) {
+      if(previousFeet.y < feet.y) {
+        if(!(state == 3 && platform.fallable)) {
+          vel.y = 0;
+          center.y = (platform.y) - 32;
+        
+          grounded = true;
+          platform.playerTouching = true;
+        }
+        
+      } 
+    } else if(platform.playerTouching && !platform.collisionCheck(feet)) {
+      platform.playerTouching = false;
+      grounded = false;
+    }
   }
 }

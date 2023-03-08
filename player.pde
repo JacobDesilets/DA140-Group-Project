@@ -174,19 +174,16 @@ class Player {
   
   void update() {
     //println(center.y);
+    println(grounded);
     
     if(!grounded) {
-      println("got here");
       applyForce(new PVector(0, GRAVITY));
     }
     
     acc.mult(damage);
     vel.mult(MOVEMENT_MULTIPLIER);
     vel.add(acc);
-    println("  " + center.y);
     center.add(vel);
-    println(vel);
-    println(center.y);
     previousFeet = feet.copy();
     feet.x = center.x;
     feet.y = center.y + 32.0;
@@ -205,7 +202,11 @@ class Player {
         center.y = (platform.y) - 32;
         
         grounded = true;
-      }
+        platform.playerTouching = true;
+      } 
+    } else if(platform.playerTouching && !platform.collisionCheck(feet)) {
+      platform.playerTouching = false;
+      grounded = false;
     }
   }
 }

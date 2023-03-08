@@ -4,31 +4,9 @@
 //  float sHeight;
 //  float translateX;
 //  float translateY;
-//  float divisions;
-//  boolean isVisible = true;
-  
-//  Stage (float tempW, float tempY, float tempTransX, float tempTransY, float divs)
-//  {
-//    sWidth = tempW;
-//    sHeight = tempY;
-//    translateY = tempTransY;
-//    translateX = tempTransX;
-//    divisions = divs;
-//  }
-  
-//  void display() 
-//  {   
-//      noStroke();
-//      rect(((width*1/2) - (sWidth*1/2)) - translateX, height - translateY, sWidth, sHeight); 
-//      //rect(width - translateX, height - translateY, sWidth, sHeight); 
-      
-//  }
-//}
-
-
 class Platform {
   float x, y, w, h;
-  boolean fallable;
+  boolean fallable, playerTouching;
   
   Platform(float x, float y, float w, float h, boolean fallable) {
     this.x = x;
@@ -36,6 +14,7 @@ class Platform {
     this.w = w;
     this.h = h;
     this.fallable = fallable;
+    playerTouching = false;
   }
   
   void display() {

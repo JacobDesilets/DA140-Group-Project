@@ -85,11 +85,6 @@ void draw()
    text("Player 1: " + player1.damage, 50, 50);
    text("Player 2: " + player2.damage, 50, 100);
    
-   //stage1.display();
-   //stage2.display();
-   //stage3.display();
-   //stage4.display();
-   
    for (Platform p : platforms) {
      p.display();
    }
@@ -109,27 +104,6 @@ void draw()
      
    }
    
-   //player1.input(input);
-   //player1.update();
-   //player1.display();
-   
-   //player2.input(input);
-   //player2.update();
-   //player2.display();
-   
-   //player1.grounded = false;
-   //player2.grounded = false;
-   
-   //Function calls for each platform
-   //onPlatform (stage1, player1);a
-   //playerOnPlatformCheck(player1, p1);
-   //playerOnPlatformCheck(player1, p2);
-   //playerOnPlatformCheck(player1, p3);
-   
-   //playerOnPlatformCheck(player2, p1);
-   //playerOnPlatformCheck(player2, p2);
-   //playerOnPlatformCheck(player2, p3);
-   
    // hit checks
    if(hitCheck(player1, player2) && player1.attacking) {
      float dir = player1.facingRight ? 0 : -PI;
@@ -146,32 +120,6 @@ void draw()
 boolean hitCheck(Player plyr1, Player plyr2) {
   return( plyr1.fist.x > (plyr2.center.x -24 ) && plyr1.fist.x < (plyr2.center.x + 24 ) && plyr1.fist.y > (plyr2.center.y -24 ) && plyr1.fist.y < (plyr2.center.y + 24 ));
 }
-
-//void playerOnPlatformCheck(Player plyr, Platform pltfm) {
-//  if(pltfm.collisionCheck(plyr.feet)) {
-//     if(!plyr.phaseThrough || !pltfm.fallable) {
-//       plyr.vel.y = 0;
-//       plyr.center.y = pltfm.y - 32;
-//       plyr.grounded = true;
-//     }
-//  }
-//}
-
-////Edits player attributes based on if it is on platform or not
-//void onPlatform ( Stage stg, Player ply ) { 
-//  if(isOnPlatform(stg, ply)) {                                       // Checks if on platform
-//    if(ply.vel.y > 0 && ply.feet.y < (height - stg.translateY)) {    // Player is moving downard when landing on platform
-//      ply.vel.y = 0;                                                 // Stops players vertical movement 
-//      ply.grounded = true;
-//    }
-//  }
-//}
-
-////Is player within platform bounds
-//boolean isOnPlatform( Stage stg, Player ply) {
-//  println(ply.feet.x > (width/2-stg.sWidth/2) && (ply.feet.x < (width/2+stg.sWidth/2)) && (ply.feet.y == height - stg.translateY));
-//  return (ply.feet.x > (width/2-stg.sWidth/2) && (ply.feet.x < (width/2+stg.sWidth/2)) && (ply.feet.y == height - stg.translateY));
-//}
 
 // keep track of which keys are pressed in the kbInputs hashmap
 void keyPressed() {

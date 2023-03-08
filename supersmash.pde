@@ -78,9 +78,6 @@ void draw()
    background(0);
    
 
-   // UI
-   text("Player 1: " + player1.damage, 50, 50);
-   text("Player 2: " + player2.damage, 50, 100);
    
    for (Platform p : platforms) {
      p.display();
@@ -92,6 +89,8 @@ void draw()
    //player2.phaseThrough = false;
    
    for(Player p : players) {
+     displayStocks(p);
+     displayStats(p);
      p.input(input);
      p.display();
      
@@ -99,6 +98,8 @@ void draw()
      for(Platform platform : platforms) {
        p.platformCollide(platform);
      }
+     
+     playerReset(p);
      
    }
    
@@ -112,9 +113,9 @@ void draw()
      float dir = player2.facingRight ? 0 : -PI;
      player1.takeDamage(0.1, dir);
    }
+   
+   displayWin(player1, player2);
     
-   playerReset(player1);
-   playerReset(player2);
 
 }
 
@@ -127,13 +128,24 @@ boolean hitCheck(Player plyr1, Player plyr2) {
 void displayStats( Player ply ) { 
   fill (0,0,255);
   textSize(32);
- 
+  println("got here");
   if(ply.player1) {
     text("P1: " + round(player1.damage * 10) * .1 + "%", (width/2 - 155), 30); 
   } else {
     text("P2: " + round(player2.damage * 10) * .1 + "%", (width/2 + 45), 30); 
   }
 }
+
+void displayWin( Player ply1, Player ply2 ){
+  fill(0,0,255);
+  textSize(32);
+  
+  if (ply1.stocks <= 0)
+    text("Player 2 Wins!", width/2 - 100, height/2);
+  if (ply2.stocks <= 0)
+    text("Player 1 Wins!", width/2 - 100, height/2);
+}
+
 
 //Displays current player stocks as circles
 void displayStocks( Player ply) {
@@ -170,38 +182,10 @@ void playerReset( Player ply) {
   }
 }
 
-
-void playerOnPlatformCheck(Player plyr, Platform pltfm) {
-  if(pltfm.collisionCheck(plyr.feet)) {
-     if(!plyr.phaseThrough || !pltfm.fallable) {
-       plyr.vel.y = 0;
-       plyr.center.y = pltfm.y - 32;
-       plyr.grounded = true;
-     }
-  }
-}
-
-//Edits player attributes based on if it is on platform or not
-void onPlatform ( Stage stg, Player ply ) { 
-  if(isOnPlatform(stg, ply)) {                                       // Checks if on platform
-    if(ply.vel.y > 0 && ply.feet.y < (height - stg.translateY)) {    // Player is moving downard when landing on platform
-      ply.vel.y = 0;                                                 // Stops players vertical movement 
-      ply.grounded = true;
-    }
-  }
-}
-
-//Is player within platform bounds
-boolean isOnPlatform( Stage stg, Player ply) {
-  println(ply.feet.x > (width/2-stg.sWidth/2) && (ply.feet.x < (width/2+stg.sWidth/2)) && (ply.feet.y == height - stg.translateY));
-  return (ply.feet.x > (width/2-stg.sWidth/2) && (ply.feet.x < (width/2+stg.sWidth/2)) && (ply.feet.y == height - stg.translateY));
-}
-
 //Is player off screen 
 boolean isOffStage( Player ply ) {
   return (ply.center.y > height+32);
 }
-
 
 // keep track of which keys are pressed in the kbInputs hashmap
 void keyPressed() {

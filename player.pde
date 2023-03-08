@@ -196,13 +196,16 @@ class Player {
   }
   
   void platformCollide(Platform platform) {
-    if(platform.collisionCheck(feet) && !grounded) {
+    if(platform.collisionCheck(feet) && !grounded ) {
       if(previousFeet.y < feet.y) {
-        vel.y = 0;
-        center.y = (platform.y) - 32;
+        if(!(state == 3 && platform.fallable)) {
+          vel.y = 0;
+          center.y = (platform.y) - 32;
         
-        grounded = true;
-        platform.playerTouching = true;
+          grounded = true;
+          platform.playerTouching = true;
+        }
+        
       } 
     } else if(platform.playerTouching && !platform.collisionCheck(feet)) {
       platform.playerTouching = false;

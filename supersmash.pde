@@ -17,10 +17,6 @@ HashMap<Character, Boolean> input = new HashMap<Character, Boolean>();
 
 Player player1, player2;
 Player[] players;
-//Stage stage1;
-//Stage stage2 = new Stage(125,10, 150, 250,100);
-//Stage stage3 = new Stage(125,10, -150, 250,100);
-//Stage stage4 = new Stage(125,10, 0, 375,100);
 
 Platform p1, p2, p3;
 Platform[] platforms;

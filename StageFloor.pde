@@ -1,9 +1,3 @@
-//class Stage
-//{
-//  float sWidth;
-//  float sHeight;
-//  float translateX;
-//  float translateY;
 class Platform {
   float x, y, w, h;
   boolean fallable, playerTouching;
@@ -19,7 +13,12 @@ class Platform {
   
   void display() {
     noStroke();
-    fill(0, 0, 255);
+    if(fallable) {
+      fill(255, 255, 255);
+    } else {
+      fill(0, 0, 255);
+    }
+    
     rect(x, y, w, h);
   }
   

@@ -1,4 +1,5 @@
 import java.util.Map;
+import java.text.DecimalFormat;
 
 PImage p1idle;
 PImage p1walk;
@@ -12,10 +13,12 @@ PImage p2jump;
 PImage p2duck;
 PImage p2attack;
 
+PImage fist;
 PImage floor1, floor2, floor3;
 
 HashMap<Character, Boolean> input = new HashMap<Character, Boolean>();
 
+ParticleSystem ps;
 
 Player player1, player2;
 Player[] players;
@@ -31,6 +34,9 @@ void setup()
   colorMode(HSB, 255);
   imageMode(CENTER);
   size (800,500);
+  
+  fist = loadImage("art/fist.png");
+  fist.resize(32,32);
   
   p1idle = loadImage("art/char1_idle.png");
   p1walk = loadImage("art/char1_walk.png");
@@ -61,10 +67,10 @@ void setup()
   floor3 = loadImage("art/Plat2.png");
   
   //stage1 = new Stage(500,20, 0, 125,100);
-  player1 = new Player(p1idle, p1walk, p1jump, p1duck, p1attack, true);
+  player1 = new Player(p1idle, p1walk, p1jump, p1duck, p1attack, fist, true);
   player1.center.x = width/2;
   
-  player2 = new Player(p2idle, p2walk, p2jump, p2duck, p2attack, false);
+  player2 = new Player(p2idle, p2walk, p2jump, p2duck, p2attack, fist, false);
   player2.center.x = width/2 + 50;
   
   players = new Player[]{player1, player2};
@@ -82,23 +88,18 @@ void setup()
   floor3.resize(int(p3.w),0);
   
   platforms = new Platform[]{p1, p2, p3};
+  
+  ps = new ParticleSystem();
 }
 
 void draw()
 {  
    background(0);
    
-
-   
    for (Platform p : platforms) {
      p.display();
    }
 
-   
-   
-   //player1.phaseThrough = false;
-   //player2.phaseThrough = false;
-   
    for(Player p : players) {
      displayStocks(p);
      displayStats(p);
@@ -117,15 +118,16 @@ void draw()
    // hit checks
    if(hitCheck(player1, player2) && player1.attacking) {
      float dir = player1.facingRight ? 0 : -PI;
-     player2.takeDamage(0.1, dir);
+     player2.takeDamage(0.3, dir);
    }
    
    if(hitCheck(player2, player1) && player2.attacking) {
      float dir = player2.facingRight ? 0 : -PI;
-     player1.takeDamage(0.1, dir);
+     player1.takeDamage(0.3, dir);
    }
    
    displayWin(player1, player2);
+   ps.run();
     
 
 }
@@ -136,14 +138,14 @@ boolean hitCheck(Player plyr1, Player plyr2) {
 
 
 //Displays player percent
-void displayStats( Player ply ) { 
+void displayStats( Player ply ) {
+  DecimalFormat df = new DecimalFormat("#.##");
   fill (0,0,255);
   textSize(32);
-  println("got here");
   if(ply.player1) {
-    text("P1: " + round(player1.damage * 10) * .1 + "%", (width/2 - 155), 30); 
+    text("P1: " + df.format(round(player1.damage * 10) - 10) + "%", (width/2 - 155), 30); 
   } else {
-    text("P2: " + round(player2.damage * 10) * .1 + "%", (width/2 + 45), 30); 
+    text("P2: " + df.format(round(player2.damage * 10) - 10) + "%", (width/2 + 45), 30); 
   }
 }
 
@@ -184,7 +186,8 @@ void displayStocks( Player ply) {
 //Resets player once they have fallen off the screem
 void playerReset( Player ply) {
   if(isOffStage(ply)) {     
-    ply.stocks--;  
+    ply.stocks--;
+    ply.deathExplode();
     if (ply.stocks > 0) {     
       ply.damage = 1;
       ply.center.x = width/2;

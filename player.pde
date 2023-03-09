@@ -1,7 +1,7 @@
 
 class Player {
   PVector feet, previousFeet, center, vel, acc, fist;
-  PImage idle, walk, jump, duck, attack;
+  PImage idle, walk, jump, duck, attack, punch;
   float damage;
   boolean player1;
   boolean grounded;
@@ -9,15 +9,17 @@ class Player {
   
   float MOVEMENT_MULTIPLIER = 0.9;
   float GRAVITY = 1;
-  int ATTACK_COOLDOWN = 1000;
+  int ATTACK_COOLDOWN = 500;
+  int ATTACK_LENGTH = 200;
+  int HIT_COOLDOWN = 500;
   
   float JUMP_SPEED = 30;
   float MOVE_SPEED = 1;
   
 
-  int attack_cooldown_timer, attack_length;
+  int attack_cooldown_timer, attack_length_timer, hit_timer, attack_anim_ctr;
   int stocks = 3;
-  int timer;
+  int hue;
   
   char U, D, R, L, A;
   
@@ -29,7 +31,7 @@ class Player {
                             // 3: ducking
                             // 4: attacking
   
-  Player(PImage idle, PImage walk, PImage jump, PImage duck, PImage attack, boolean player1) {
+  Player(PImage idle, PImage walk, PImage jump, PImage duck, PImage attack, PImage punch, boolean player1) {
     // imageMode(CENTER);
     this.idle = idle;
     this.walk = walk;
@@ -37,6 +39,7 @@ class Player {
     this.duck = duck;
     this.attack = attack;
     this.player1 = player1;
+    this.punch = punch;
     
     feet = new PVector(0, 32);
     previousFeet = new PVector(0, 32);
@@ -68,19 +71,29 @@ class Player {
     
     facingRight = true;
     attack_cooldown_timer = millis();
+    attacking = false;
+    
+    hue = player1 ? 0 : 195;
   }
   
   void takeDamage(float dmg, float dir) {
-    damage += dmg;
+    if(checkTimer(hit_timer, HIT_COOLDOWN)) {
+      hit_timer = millis();
+      damage += dmg;
     
-    PVector knockback = PVector.fromAngle(dir);
-    knockback.setMag(damage);
-    applyForce(knockback);
+      PVector knockback = PVector.fromAngle(dir);
+      knockback.setMag(2 * damage);
+      knockback.add(PVector.fromAngle(-HALF_PI).setMag(2 * damage));
+      applyForce(knockback);
+      
+      
+      ps.createParticles(fist.x, fist.y, 20, hue, dir);
+    }
   }
   
   void input(HashMap<Character, Boolean> inputs) {
     state = 0;
-    attacking = false;
+    //attacking = false;
     
     if(inputs.get(U) && grounded) {
       // jump
@@ -122,12 +135,11 @@ class Player {
       facingRight = false;
     }
     if(inputs.get(A)) {
-      // attackg
-      
-      
+      // attack
       if(checkTimer(attack_cooldown_timer, ATTACK_COOLDOWN)) {
+        attack_anim_ctr = 0;
         attack_cooldown_timer = millis();
-        attack_length = millis();
+        attack_length_timer = millis();
         attacking = true;
         state = 4;
       }
@@ -163,10 +175,20 @@ class Player {
     
     
     
+    
     fill(128, 255, 255);
     ellipse(0, 32, 5, 5);
     popMatrix();
-    ellipse(fist.x, fist.y, 5, 5);
+    
+    pushMatrix();
+    translate(fist.x, fist.y);
+    
+    if(!facingRight) { scale(-1, 1); }
+    else { scale(1, 1); }
+    if(attacking) {
+      image(punch, 0, 0);
+    }
+    popMatrix();
   }
   
     
@@ -176,14 +198,15 @@ class Player {
   }
   
   void update() {
-    //println(center.y);
-    println(grounded);
+    if(attacking && checkTimer(attack_length_timer, ATTACK_LENGTH)) {
+      attacking = false;
+    } else if(attacking) { attack_anim_ctr++; }
     
     if(!grounded) {
       applyForce(new PVector(0, GRAVITY));
     }
     
-    acc.mult(damage);
+    //acc.mult(damage);
     vel.mult(MOVEMENT_MULTIPLIER);
     vel.add(acc);
     center.add(vel);
@@ -195,7 +218,6 @@ class Player {
     else { fist.x = center.x-32; }
     
     acc.mult(0);
-    //grounded = false;
   }
   
   void platformCollide(Platform platform) {
@@ -214,5 +236,10 @@ class Player {
       platform.playerTouching = false;
       grounded = false;
     }
+  }
+  
+  void deathExplode() {
+    float angle = vel.heading();
+    ps.createParticles(center.x, center.y-30, 40, hue, angle);
   }
 }

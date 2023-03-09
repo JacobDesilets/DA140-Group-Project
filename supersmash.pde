@@ -14,6 +14,7 @@ PImage p2duck;
 PImage p2attack;
 
 PImage fist;
+PImage floor1, floor2, floor3;
 
 HashMap<Character, Boolean> input = new HashMap<Character, Boolean>();
 
@@ -61,6 +62,10 @@ void setup()
   p2duck.resize(64,64);
   p2attack.resize(64,64);
   
+  floor1 = loadImage("art/Plat2.png");
+  floor2 = loadImage("art/Plat1.png");
+  floor3 = loadImage("art/Plat2.png");
+  
   //stage1 = new Stage(500,20, 0, 125,100);
   player1 = new Player(p1idle, p1walk, p1jump, p1duck, p1attack, fist, true);
   player1.center.x = width/2;
@@ -74,9 +79,14 @@ void setup()
     input.put(c, false);
   }
   
-  p1 = new Platform(20, height-50, 500, 20, false);
-  p2 = new Platform(20, height-200, 200, 20, true);
-  p3 = new Platform(200, height-350, 200, 20, true);
+  p1 = new Platform(floor1, 20, height-50, 500, 20, false);
+  p2 = new Platform(floor2, 20, height-200, 200, 20, true);
+  p3 = new Platform(floor3, 200, height-350, 200, 20, true);
+  
+  floor1.resize(int(p1.w),0);
+  floor2.resize(int(p2.w),0);
+  floor3.resize(int(p3.w),0);
+  
   platforms = new Platform[]{p1, p2, p3};
   
   ps = new ParticleSystem();

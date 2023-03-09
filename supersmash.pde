@@ -1,4 +1,5 @@
 import java.util.Map;
+import java.text.DecimalFormat;
 
 PImage p1idle;
 PImage p1walk;
@@ -16,6 +17,7 @@ PImage fist;
 
 HashMap<Character, Boolean> input = new HashMap<Character, Boolean>();
 
+ParticleSystem ps;
 
 Player player1, player2;
 Player[] players;
@@ -76,23 +78,18 @@ void setup()
   p2 = new Platform(20, height-200, 200, 20, true);
   p3 = new Platform(200, height-350, 200, 20, true);
   platforms = new Platform[]{p1, p2, p3};
+  
+  ps = new ParticleSystem();
 }
 
 void draw()
 {  
    background(0);
    
-
-   
    for (Platform p : platforms) {
      p.display();
    }
 
-   
-   
-   //player1.phaseThrough = false;
-   //player2.phaseThrough = false;
-   
    for(Player p : players) {
      displayStocks(p);
      displayStats(p);
@@ -116,10 +113,11 @@ void draw()
    
    if(hitCheck(player2, player1) && player2.attacking) {
      float dir = player2.facingRight ? 0 : -PI;
-     player1.takeDamage(0.1, dir);
+     player1.takeDamage(0.3, dir);
    }
    
    displayWin(player1, player2);
+   ps.run();
     
 
 }
@@ -130,13 +128,14 @@ boolean hitCheck(Player plyr1, Player plyr2) {
 
 
 //Displays player percent
-void displayStats( Player ply ) { 
+void displayStats( Player ply ) {
+  DecimalFormat df = new DecimalFormat("#.##");
   fill (0,0,255);
   textSize(32);
   if(ply.player1) {
-    text("P1: " + round(player1.damage * 10) * .1 + "%", (width/2 - 155), 30); 
+    text("P1: " + df.format(round(player1.damage * 10) - 10) + "%", (width/2 - 155), 30); 
   } else {
-    text("P2: " + round(player2.damage * 10) * .1 + "%", (width/2 + 45), 30); 
+    text("P2: " + df.format(round(player2.damage * 10) - 10) + "%", (width/2 + 45), 30); 
   }
 }
 
@@ -177,7 +176,8 @@ void displayStocks( Player ply) {
 //Resets player once they have fallen off the screem
 void playerReset( Player ply) {
   if(isOffStage(ply)) {     
-    ply.stocks--;  
+    ply.stocks--;
+    ply.deathExplode();
     if (ply.stocks > 0) {     
       ply.damage = 1;
       ply.center.x = width/2;

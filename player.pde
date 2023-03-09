@@ -9,7 +9,7 @@ class Player {
   
   float MOVEMENT_MULTIPLIER = 0.9;
   float GRAVITY = 1;
-  int ATTACK_COOLDOWN = 1000;
+  int ATTACK_COOLDOWN = 500;
   int ATTACK_LENGTH = 200;
   int HIT_COOLDOWN = 500;
   
@@ -17,9 +17,9 @@ class Player {
   float MOVE_SPEED = 1;
   
 
-  int attack_cooldown_timer, attack_length_timer, hit_timer;
+  int attack_cooldown_timer, attack_length_timer, hit_timer, attack_anim_ctr;
   int stocks = 3;
-  int timer;
+  int hue;
   
   char U, D, R, L, A;
   
@@ -72,6 +72,8 @@ class Player {
     facingRight = true;
     attack_cooldown_timer = millis();
     attacking = false;
+    
+    hue = player1 ? 0 : 195;
   }
   
   void takeDamage(float dmg, float dir) {
@@ -80,8 +82,12 @@ class Player {
       damage += dmg;
     
       PVector knockback = PVector.fromAngle(dir);
-      knockback.setMag(damage);
+      knockback.setMag(2 * damage);
+      knockback.add(PVector.fromAngle(-HALF_PI).setMag(2 * damage));
       applyForce(knockback);
+      
+      
+      ps.createParticles(fist.x, fist.y, 20, hue, dir);
     }
   }
   
@@ -131,10 +137,10 @@ class Player {
     if(inputs.get(A)) {
       // attack
       if(checkTimer(attack_cooldown_timer, ATTACK_COOLDOWN)) {
+        attack_anim_ctr = 0;
         attack_cooldown_timer = millis();
         attack_length_timer = millis();
         attacking = true;
-        println("attack!");
         state = 4;
       }
     }
@@ -176,6 +182,7 @@ class Player {
     
     pushMatrix();
     translate(fist.x, fist.y);
+    
     if(!facingRight) { scale(-1, 1); }
     else { scale(1, 1); }
     if(attacking) {
@@ -192,15 +199,14 @@ class Player {
   
   void update() {
     if(attacking && checkTimer(attack_length_timer, ATTACK_LENGTH)) {
-      println("got here!");
       attacking = false;
-    }
+    } else if(attacking) { attack_anim_ctr++; }
     
     if(!grounded) {
       applyForce(new PVector(0, GRAVITY));
     }
     
-    acc.mult(damage);
+    //acc.mult(damage);
     vel.mult(MOVEMENT_MULTIPLIER);
     vel.add(acc);
     center.add(vel);
@@ -212,7 +218,6 @@ class Player {
     else { fist.x = center.x-32; }
     
     acc.mult(0);
-    //grounded = false;
   }
   
   void platformCollide(Platform platform) {
@@ -231,5 +236,10 @@ class Player {
       platform.playerTouching = false;
       grounded = false;
     }
+  }
+  
+  void deathExplode() {
+    float angle = vel.heading();
+    ps.createParticles(center.x, center.y-30, 40, hue, angle);
   }
 }

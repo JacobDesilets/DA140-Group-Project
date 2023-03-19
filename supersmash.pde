@@ -1,5 +1,6 @@
 import java.util.Map;
 import java.text.DecimalFormat;
+import processing.sound.*;
 
 PImage p1idle;
 PImage p1walk;
@@ -66,7 +67,6 @@ void setup()
   floor2 = loadImage("art/Plat1.png");
   floor3 = loadImage("art/Plat2.png");
   
-  //stage1 = new Stage(500,20, 0, 125,100);
   player1 = new Player(p1idle, p1walk, p1jump, p1duck, p1attack, fist, true);
   player1.center.x = width/2;
   
@@ -79,9 +79,9 @@ void setup()
     input.put(c, false);
   }
   
-  p1 = new Platform(floor1, 20, height-50, 500, 20, false);
-  p2 = new Platform(floor2, 20, height-200, 200, 20, true);
-  p3 = new Platform(floor3, 200, height-350, 200, 20, true);
+  p1 = new Platform(floor1, 150, height-50, 500, 20, false);
+  p2 = new Platform(floor2, 200, height-200, 200, 20, true);
+  p3 = new Platform(floor3, 400, height-350, 200, 20, true);
   
   floor1.resize(int(p1.w),0);
   floor2.resize(int(p2.w),0);

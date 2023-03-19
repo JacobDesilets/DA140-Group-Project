@@ -24,9 +24,6 @@ class Platform {
     
     //rect(x, y, w, h);
     image(floor,x+w/2,y+h/2);
-    
-    
-    
   }
   
   boolean collisionCheck(PVector point) {
